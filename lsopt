@@ -16,5 +16,10 @@ for t in "$@"; do
   fi
 done
 
+if ! port=$(prt-get path "$1" 2>&1); then
+    echo "$port"
+    exit 1
+fi
+
 port=$(prt-get path $1)
 grep '# Optional:' $port/Pkgfile | sed 's/# Optional: //' | sed "s/ /\n/g"
