@@ -42,18 +42,20 @@ fi
 if [[ "$1" = "-s" ]] || [[ "$1" = "--snap" ]]; then
 	mkdir -p $PKGDIR_SNAP
 	cp $PKGREPO $PKGREPO_OLD
-	echo "** snapshot of PKGREPO created in $PKGDIR_SNAP"
+	echo "=======> A snapshot of $PKGREPO created in $PKGDIR_SNAP"
 	exit 0
 fi
 
 # Check if these exist
 if ! [ -f $PKGREPO ]; then
-	echo "** PKGREPO does not exist, run pkg-get sync"
+	echo "$PKGREPO does not exist"
+	echo "** Did you run pkg-get sync ?"
 	exit 1
 fi
 
 if ! [ -f $PKGREPO_OLD ]; then
-	echo "** old PKGREPO does not exist, run $(basename $0) --snap"
+	echo "$PKGREPO_OLD snapshot does not exist"
+	echo "** Did you run $(basename $0) --snap ?"
 	exit 1
 fi
 
@@ -83,7 +85,8 @@ fi
 
 # If pkg-diff is run without options and no differences are found
 if [[ -z "$DIFFERENT" ]]; then
-	echo "** identical PKGREPO, did you run pkg-get sync?"
+	echo "$PKGREPO_OLD is identical to $PKGREPO"
+	echo "** Did you run pkg-get sync?"
 	exit 0
 fi
 
