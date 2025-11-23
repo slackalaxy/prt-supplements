@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# lsopt: list optional dependencies for a port
+
+# Is input empty?
+if [ "$1" = "" ]; then
+    echo "Input is empty. Usage: $(basename $0) [port...]"
+    exit 1
+fi
+
+# no options with the tool
+for t in "$@"; do
+  if [ "${t:0:1}" = "-" ]; then
+    echo -e "Invalid input $t. Usage: $(basename $0) [package...]"
+    exit 1
+  fi
+done
+
+port=$(prt-get path $1)
+grep '# Optional:' $port/Pkgfile | sed 's/# Optional: //' | sed "s/ /\n/g"
