@@ -19,6 +19,9 @@ immediate installed dependents.
 Supplying the `-l|--list` option will output a simple list of missing
 dependencies, easy to parse.
 
+## lsopt
+This script simply list the optional dependencies for a port.
+
 ## pkg-diff
 This is meant for systems managed by [pkg-get](https://crux.nu/portdb/?a=search&q=pkg-get) to install prebuilt packages.
 A `pkg-get sync` is only aware of packages with changed version/release,
