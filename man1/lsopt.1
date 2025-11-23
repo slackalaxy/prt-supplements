@@ -1,0 +1,49 @@
+.\" 
+.\" lsopt manual page.
+.\" (C) 2025 by Petar Petrov <slackalaxy@gmail.com> 
+.\"
+.TH lsopt 1
+.SH NAME
+lsopt \- List optional dependencies of a port.
+.SH SYNOPSIS
+.PP
+.B lsopt
+.SH DESCRIPTION
+
+The \fBlsopt\fP script lists the optional dependencies for a \fBport\fP(8),
+by simply scanning for the \fB# Optional:\fP line.
+
+.SH OPTIONS
+.TP
+no options available
+
+.SH EXAMPLES
+.TP
+.B lsopt mesa
+.PP
+.nf
+.fam C
+cbindgen
+directx-headers
+glslang
+libclc
+libdisplay-info
+libunwind
+libva
+libvdpau
+lm_sensors
+lua
+python3-ply
+rust-bindgen
+spirv-llvm-translator
+vulkan-loader
+wayland-protocols
+.fam T
+.fi
+
+.SH SEE ALSO
+\fBports\fP(8)
+
+.SH AUTHOR
+
+\fBlsopt\fP was written by Petar Petrov <slackalaxy@gmail.com> for CRUX.
