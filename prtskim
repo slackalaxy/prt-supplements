@@ -21,17 +21,25 @@ done
 
 for i in "$@"; do
   if [[ -d $i ]]; then
-      if [ -f $i/Pkgfile ]; then
-	#pkgmk -do
-        prtwash $i
-        cd $i
-        rm -rf .md5sum
-        pkgmk -uf
+    if [ -f "$i/Pkgfile" ]; then
+      # The parentheses run these commands in a "subshell", a separate
+      # copy of the shell. The "cd" only happens inside it, so after the
+      # closing bracket we are automatically *back* in the original dir,
+      # even if $i was a path like crux-ports/custom/foo.
+      #
+      # Without &&, every command runs no matter whether the previous
+      # one succeeded. || is the opposite: means "run the next command
+      # only if the previous one failed" (echo after the parentheses).
+      (
+        prtwash "$i" &&
+        cd "$i" &&
+        rm -f .md5sum &&
+        pkgmk -uf &&
         pkgmk -us
-        cd ..
-      else
-        echo "===== $i is not a port, ingoring"
-      fi
+      ) || echo "===== $i: a step failed, $i was not signed"
+    else
+      echo "===== $i is not a port, ignoring"
+    fi
   else
     echo "===== $i is not a directory, ignoring"
   fi
