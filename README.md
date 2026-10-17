@@ -49,48 +49,6 @@ By default, `pkg-sync` promts at each step. Parsing the `-a, --auto` option will
 
 Note that `pkg-get` should be set up first!
 
-## pkg-diff
-
-This is also meant for systems managed by [pkg-get](https://crux.nu/portdb/?a=search&q=pkg-get) to install prebuilt packages (at some point I may merge the two tools). A `pkg-get sync` is only aware of packages with changed version/release, but will not notice those that have been rebuilt, for example after a `revdep` report for missing libraries.
-
-The tool compares a freshly synced PKGREPO file with a previous copy, that represents the packages currently installed (or should). The `pkg-diff` script will output the differences between installed packages found in both. It will distinguish between packages with a changed version/release and those that differ only in their .md5sum, for examaple after a rebuild.
-
-At the moment `pkg-diff` does not report new or removed packages in PKGREPO.
-
-To create a snapshot of the current PKGREPO:
-
-```         
-pkg-diff -s
-```
-
-After a `pkg-get sync`, simply running `pkg-diff` will output a verbose report:
-
-```         
-pkg-diff
-
--- differences ([u] = updated, [r] = rebuilt)
-[u] apr-util
-[u] dhcpcd
-[u] libinput
-[u] libusb
-[r] nss
-[r] openmpi
-[r] pciutils
-[r] python3
-[u] util-linux
-```
-
-To output only the packages that have not changed versions, but have been rebuilt, do:
-
-```         
-pkg-diff -lr
-
-nss
-openmpi
-pciutils
-python3
-```
-
 ## prtskim
 
 This cleans and updates port(s), by running `prtwash`, removing any `.md5sum`, and updateing footprint and signature. It can be run on a single port or a collection of ports, e.g. `prtskim *`.
