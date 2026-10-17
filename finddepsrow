@@ -24,7 +24,8 @@ done
 
 echo "** checking"
 
-found=$(finddeps ${1} | grep -v "core" | awk '{print $1}')
+# ' (core)$' matches a space, then literally (core), then $, which means "end of line".
+found=$(finddeps ${1} | grep -v ' (core)$' | awk '{print $1}')
 revck=$(revdep ${1})
 
 if [ "$revck" = "$1" ]; then
