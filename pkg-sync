@@ -90,7 +90,7 @@ orphan_remove(){
 	removed=($(prtorphan))
 	if (( ${#removed[@]} > 0 )); then
     		echo "=======> Remove orphaned pkgs."
-    	prt-get remove $removed
+    	prt-get remove "${removed[@]}"
 	else
     		echo "===== No orphans."
 	fi
@@ -105,7 +105,7 @@ install_missing(){
 	missing=($(missdeps))
 	if (( ${#missing[@]} > 0 )); then
     		echo "=======> Install missing deps."
-    		pkg-get depinst $missing
+    		pkg-get depinst "${missing[@]}"
 	else
     		echo "===== No missing deps."
 	fi
@@ -136,7 +136,7 @@ reinstall_revdep(){
 	revdeps=($(revdep))
 	if (( ${#revdeps[@]} > 0 )); then
 		echo "=======> Reinstall rebuilt pkgs."
-		pkg-get update $revdeps -fr
+		pkg-get update "${revdeps[@]}" -fr
 	else
 		echo "===== No need to reinstall pkgs."
 	fi
