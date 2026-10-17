@@ -67,7 +67,8 @@ if [ -z "$missing" ]; then
 	exit 0
 fi
 
-prt-get listinst | xargs prt-get depends | grep "\[ \]" | sed "s:\[ \] ::g"
+# $missing was already computed on line 30
+echo "$missing"
 exit 0
 
 # are there missing deps that have no ports? Comment out, that's redundant with prtorphan
