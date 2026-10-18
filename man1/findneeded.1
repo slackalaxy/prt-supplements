@@ -1,0 +1,59 @@
+.\"
+.\" findneeded manual page.
+.\" (C) 2026 by Petar Petrov <slackalaxy@gmail.com>
+.\"
+.TH findneeded 1
+.SH NAME
+findneeded \- List the ports a package links to directly, as a row.
+.SH SYNOPSIS
+.PP
+.B findneeded
+.I package
+.SH DESCRIPTION
+
+The \fBfindneeded\fP script outputs the ports whose libraries an installed
+package links to directly, as a single row, suitable for the \fB# Depends on:\fP
+line in the \fBPkgfile\fP(5). Dependencies from \fB(core)\fP are omitted.
+Only one package is checked at a time.
+
+Unlike \fBfinddeps\fP(1), which uses \fBldd\fP(1) and reports every library that
+gets loaded (including the libraries of libraries), this tool reads only the
+libraries the package's own files ask for, the NEEDED entries shown by
+\fBreadelf\fP(1). Each library is matched to the package that provides it in the
+standard library folders, as found by \fBldconfig\fP(8) and \fBpkginfo\fP(8).
+Copies bundled by other packages in private folders are ignored.
+
+Libraries that no installed package provides are reported as \fBnot found\fP.
+
+.SH OPTIONS
+.TP
+no options available
+
+.SH EXAMPLES
+.B
+findneeded lxappearance
+.PP
+displays the ports that lxappearance binaries and libs link to directly:
+
+.PP
+at-spi2-core cairo gdk-pixbuf glib gtk3 harfbuzz pango xorg-libx11
+
+.B
+NOTE
+.PP
+Some of the listed ports may come with other dependencies in the list (here
+most of them come with gtk3). Run \fBfindredundantdeps\fP(1) afterwards to
+trim them.
+
+For prebuilt programs that bundle their own libraries, use \fBfinddeps\fP(1)
+instead. Build-time tools (e.g. intltool, which lxappearance needs to build) and
+programs a package only runs (e.g. openvpn for networkmanager-openvpn) cannot
+be detected and have to be added by hand.
+
+.SH SEE ALSO
+\fBfinddeps\fP(1), \fBfinddepsrow\fP(1), \fBfindredundantdeps\fP(1), \fBreadelf\fP(1), \fBldconfig\fP(8), \fBpkginfo\fP(8), \fBprt\-get\fP(8), \fBPkgfile\fP(5)
+
+.SH AUTHOR
+
+\fBfindneeded\fP was written by Petar Petrov <slackalaxy@gmail.com> for CRUX,
+with help from Claude (Anthropic).
