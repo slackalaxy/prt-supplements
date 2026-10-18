@@ -1,0 +1,100 @@
+#!/bin/bash
+#
+# findneeded: list the ports an installed package uses DIRECTLY.
+#
+# This uses readelf NEEDED entries, omits core ports, and outputs a
+# single line ready for "# Depends on:".
+#
+# A lot of help by Claude, especially with regex and awk.
+#
+# Petar Petrov, slackalaxy at gmail dot com
+
+# Is input a single package? Is it empty?
+if [ $# -ne 1 ]; then
+    echo "Usage: $(basename "$0") package"
+    exit 1
+fi
+
+# no options with the tool
+for t in "$@"; do
+  if [ "${t:0:1}" = "-" ]; then
+    echo "Invalid input $t. Usage: $(basename "$0") package"
+    exit 1
+  fi
+done
+
+# Check if package is installed
+prt-get isinst "$1" >/dev/null || { echo "$1 is not installed"; exit 1; }
+
+files=$(pkginfo -l "$1")
+libs=$(echo "$files" | grep -E '^usr/(s?bin|lib)/' | sed 's|^|/|' \
+	| xargs -r readelf -d 2>/dev/null | grep NEEDED \
+	| sed 's/.*\[//;s/\]//' | sort -u)
+#echo "$libs"
+
+# Ask the system loader where it finds each library. ldconfig -p prints
+# lines like "libgtk-3.so.0 (libc6,x86-64) => /usr/lib/libgtk-3.so.0":
+# the name is the first word, the path is the last one.
+# Libraries in private folders (e.g. /usr/lib/dia) are not in this list;
+# they are handled below.
+cache=$(/sbin/ldconfig -p)
+table=$(for lib in $libs; do
+
+	# -v l="$lib" hands the current library name to awk as a variable l,
+	# and $1 == l means "only lines whose first word is this library".
+	# Take the last word, not the 4th: $NF. NF is awk's count of the
+	# words on the line, so $NF is the last word.
+	path=$(echo "$cache" | awk -v l="$lib" '$1 == l {print $NF; exit}')
+
+	# Not known to the loader. If the package itself has a file with
+	# this name, it is its own private library (e.g. /usr/lib/inkscape),
+	# which the program finds via a folder stored inside it: count it as
+	# the package itself, so it is skipped below. Otherwise mark it "?".
+	# awk splits each file path at "/" and compares the last part
+	# (the file name) with the library name.
+	if [ -z "$path" ]; then
+		if echo "$files" | awk -v l="$lib" '{n = split($0, a, "/")} a[n] == l {found = 1} END {exit !found}'; then
+			echo "$lib $1"
+		else
+			echo "$lib ?"
+		fi
+		continue
+	fi
+
+	# Turn the path into an exact pattern for pkginfo -o:
+	# "." and "+" have special meanings in patterns, so put them in
+	# brackets ([.] [+]) to mean a literal dot and plus; ^ and $ make
+	# it match this exact file only, not a copy in another folder.
+	pattern="^$(echo "$path" | sed 's/[.+]/[&]/g')\$"
+
+	# pkginfo -o prints a header line, then "package  file".
+	# NR == 2 takes the line after the header, $1 its first word.
+	pkg=$(pkginfo -o "$pattern" 2>/dev/null | awk 'NR == 2 {print $1}')
+	echo "$lib ${pkg:-?}"
+done)
+
+# Names of all core ports. prt-get printf prints "name path" for every
+# port, e.g. "glibc /usr/ports/core"; keep the names whose path ends in
+# /core. These are left out of the dependency line, as CRUX does.
+core=$(prt-get printf "%n %p\n" | awk '$2 ~ /\/core$/ {print $1}')
+
+# Package names from the second column of the table:
+#   - skip "?" (not found) and the package itself
+#   - sort -u: sort and remove duplicates
+#   - grep -vxF -f: remove every name that appears in the core list
+#     (-v = remove matches, -x = whole name only, so "gcc" does not
+#     remove "gcc-fortran", -F = plain text, not a pattern,
+#     -f = read the names to remove from the core list)
+deps=$(echo "$table" | awk -v self="$1" '$2 != "?" && $2 != self {print $2}' \
+	| sort -u | grep -vxF -f <(echo "$core"))
+
+# Print output
+echo "** needed outside core:"
+
+# Put them on one line, separated by spaces (paste -s joins all lines
+# into one, -d ' ' uses a space between them)
+echo "$deps" | paste -sd ' '
+
+# Libraries that no installed package provides (private, hand-installed
+# or missing)
+echo "$table" | awk '$2 == "?" {print "not found: " $1}'
