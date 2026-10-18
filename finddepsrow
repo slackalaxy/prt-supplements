@@ -22,8 +22,6 @@ for t in "$@"; do
   fi
 done
 
-echo "** checking"
-
 # ' (core)$' matches a space, then literally (core), then $, which means "end of line".
 found=$(finddeps ${1} | grep -v ' (core)$' | awk '{print $1}')
 revck=$(revdep ${1})
