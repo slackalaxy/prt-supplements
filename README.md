@@ -8,6 +8,29 @@ List port's dependencies as a row.
 
 Output dependencies found by `finddeps` as a single row, suitable for the "\# Depends on:" line in the Pkgfile. Dependencies from core are omitted. The wrapper also checks if any libs are missing by calling `revdep`.
 
+```
+$ finddepsrow lxappearance
+** deps outside core:
+at-spi2-core brotli cairo dbus fontconfig freetype fribidi gdk-pixbuf glib glycin graphite2 gtk3 harfbuzz libepoxy libpng libseccomp libxkbcommon pango wayland xorg-libpixman xorg-libx11 xorg-libxau xorg-libxcb xorg-libxcomposite xorg-libxcursor xorg-libxdamage xorg-libxdmcp xorg-libxext xorg-libxfixes xorg-libxi xorg-libxinerama xorg-libxrandr xorg-libxrender xorg-libxres 
+```
+
+## findneeded
+
+List the ports a package links to directly, as a row.
+
+Output a single row, suitable for the "\# Depends on:" line in the Pkgfile. Dependencies from core are omitted. The package must be installed.
+
+Unlike `finddeps`, which uses `ldd` and reports every library that gets loaded (including the libraries of libraries), this tool reads only the libraries the package's own files ask for (`readelf -d`, NEEDED entries). A GTK3 program will give gtk3, but not brotli, which comes in through freetype. Since freetype lists brotli only as optional, findredundantdeps cannot remove such leftovers either.
+
+```
+$ findneeded lxappearance
+** needed outside core:
+at-spi2-core cairo gdk-pixbuf glib gtk3 harfbuzz pango xorg-libx11
+```
+Build-time tools (e.g. intltool) and programs a package only runs (e.g. openvpn for networkmanager-openvpn) cannot be detected and have to be added by hand.
+
+For prebuilt programs that bundle their own libraries, use `finddeps` instead. 
+
 ## lsopt
 
 This script simply list the optional dependencies for a port.
